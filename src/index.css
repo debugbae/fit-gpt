@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background-color: #0f172a; /* Dark slate blue */
+  color: #f8fafc;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* This ensures your app fills the screen nicely on mobile */
+#root {
+  max-width: 500px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #1e293b;
+}

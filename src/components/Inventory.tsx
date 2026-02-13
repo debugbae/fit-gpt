@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Refrigerator, Plus, X } from 'lucide-react';
+import { Refrigerator, Plus, X, Package } from 'lucide-react';
 import { InventoryItem } from '../types';
 
 interface InventoryProps {
@@ -38,7 +38,7 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
           <Refrigerator className="text-blue-500 shrink-0" size={24} strokeWidth={2.5} />
           <h2 className="text-2xl font-bold text-zinc-100 tracking-tight">Food Inventory</h2>
         </div>
-        <button 
+        <button
           onClick={() => setShowForm(!showForm)}
           aria-label={showForm ? 'Close add item' : 'Add item'}
           className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all shadow-lg border ${showForm ? 'bg-zinc-900/40 text-zinc-400 border-zinc-800/50' : 'bg-blue-500 text-white shadow-blue-950/20 border-blue-500/30'}`}
@@ -51,7 +51,7 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
         <div className="bg-zinc-900/40 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-zinc-800/50 space-y-5 animate-in zoom-in-95 duration-200">
           <div>
             <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2 ml-1">Label Name</label>
-            <input 
+            <input
               className="w-full bg-zinc-700 border border-zinc-600 rounded-2xl px-4 py-3 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-zinc-600"
               placeholder="e.g. Atlantic Salmon"
               value={newItemName}
@@ -60,7 +60,7 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
           </div>
           <div>
             <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2 ml-1">Use By Date</label>
-            <input 
+            <input
               type="date"
               className="w-full bg-zinc-700 border border-zinc-600 rounded-2xl px-4 py-3 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 color-scheme-dark"
               style={{ colorScheme: 'dark' }}
@@ -68,7 +68,7 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
               onChange={(e) => setExpiry(e.target.value)}
             />
           </div>
-          <button 
+          <button
             onClick={handleAdd}
             className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-950/40 hover:bg-blue-500 transition-all"
           >
@@ -93,37 +93,40 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
       {/* List */}
       <div className="space-y-3">
         {filteredItems.length > 0 ? (
-          filteredItems.sort((a,b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()).map(item => {
-            const daysLeft = Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
-            const isCritical = daysLeft >= 0 && daysLeft < 3;
-            const isExpired = daysLeft < 0;
-            
-            return (
-              <div key={item.id} className="group bg-zinc-900/40 backdrop-blur-sm p-4 rounded-3xl border border-zinc-800/50 flex items-center justify-between shadow-sm hover:border-zinc-700 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${isCritical || isExpired ? 'bg-blue-500/10 border-blue-500/30 text-blue-500' : 'bg-zinc-800/40 border-zinc-800/50 text-zinc-500'}`}>
-                    <i className={`fas ${item.category === 'Fridge' ? 'fa-snowflake' : 'fa-box-open'}`}></i>
+          filteredItems
+            .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
+            .map(item => {
+              const daysLeft = Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+              const isCritical = daysLeft >= 0 && daysLeft < 3;
+              const isExpired = daysLeft < 0;
+
+              return (
+                <div key={item.id} className="group bg-zinc-900/40 backdrop-blur-sm p-4 rounded-3xl border border-zinc-800/50 flex items-center justify-between shadow-sm hover:border-zinc-700 transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${isCritical || isExpired ? 'bg-blue-500/10 border-blue-500/30 text-blue-500' : 'bg-zinc-800/40 border-zinc-800/50 text-zinc-500'}`}>
+                      {item.category === 'Fridge' ? <Refrigerator size={20} strokeWidth={2} /> : <Package size={20} strokeWidth={2} />}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-zinc-100">{item.name}</h4>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest inline-block mt-1 ${isExpired ? 'bg-zinc-900/40 text-zinc-600 border border-zinc-800/50' : isCritical ? 'bg-blue-600/20 text-blue-500 border border-blue-500/20' : 'bg-zinc-900/40 text-zinc-500 border border-zinc-800/50'}`}>
+                        {isExpired ? 'Expired' : `${daysLeft} days left`}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-zinc-100">{item.name}</h4>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest inline-block mt-1 ${isExpired ? 'bg-zinc-900/40 text-zinc-600 border border-zinc-800/50' : isCritical ? 'bg-blue-600/20 text-blue-500 border border-blue-500/20' : 'bg-zinc-900/40 text-zinc-500 border border-zinc-800/50'}`}>
-                      {isExpired ? 'Expired' : `${daysLeft} days left`}
-                    </span>
-                  </div>
+                  <button
+                    onClick={() => onDelete(item.id)}
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-zinc-600 hover:text-rose-500 transition-colors"
+                    aria-label="Delete item"
+                  >
+                    <X size={18} strokeWidth={2.5} />
+                  </button>
                 </div>
-                <button 
-                  onClick={() => onDelete(item.id)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-zinc-600 hover:text-blue-500 transition-colors"
-                >
-                  <i className="fas fa-trash-alt text-sm"></i>
-                </button>
-              </div>
-            );
-          })
+              );
+            })
         ) : (
           <div className="text-center py-16 rounded-3xl border border-zinc-800/50 bg-zinc-900/40 backdrop-blur-sm opacity-60">
             <div className="text-6xl mb-6">
-              <i className="fas fa-barcode-read"></i>
+              <Refrigerator size={48} className="mx-auto text-zinc-600" />
             </div>
             <p className="font-black uppercase text-xs tracking-widest">{activeTab} is Empty</p>
           </div>
