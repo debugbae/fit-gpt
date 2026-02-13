@@ -1,12 +1,10 @@
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { FoodAnalysis, RecipeSuggestion, InventoryItem, UserStats } from "../types";
 import { SYSTEM_INSTRUCTIONS } from "../constants";
 
-// Fix 1: Use the correct Class name and Vite environment variable
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 
 export const analyzeFoodImage = async (base64Image: string, userClarification?: string): Promise<FoodAnalysis> => {
-  // Fix 2: Use a valid model name (gemini-1.5-flash is the standard)
   const model = genAI.getGenerativeModel({ 
     model: "gemini-1.5-flash",
     systemInstruction: SYSTEM_INSTRUCTIONS 
@@ -26,29 +24,6 @@ export const analyzeFoodImage = async (base64Image: string, userClarification?: 
     }],
     generationConfig: {
       responseMimeType: "application/json",
-      // Fix 3: Use SchemaType instead of Type
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          itemName: { type: SchemaType.STRING },
-          macros: {
-            type: SchemaType.OBJECT,
-            properties: {
-              calories: { type: SchemaType.NUMBER },
-              protein: { type: SchemaType.NUMBER },
-              carbs: { type: SchemaType.NUMBER },
-              fats: { type: SchemaType.NUMBER },
-              sodium: { type: SchemaType.NUMBER }
-            },
-            required: ['calories', 'protein', 'carbs', 'fats', 'sodium']
-          },
-          portionEstimate: { type: SchemaType.STRING },
-          ingredients: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-          isAmbiguous: { type: SchemaType.BOOLEAN },
-          ambiguityQuestion: { type: SchemaType.STRING }
-        },
-        required: ['itemName', 'isAmbiguous']
-      }
     }
   });
 
