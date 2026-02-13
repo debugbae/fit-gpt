@@ -1,5 +1,10 @@
-
 import React, { useState } from 'react';
+import { 
+  Refrigerator, 
+  Search, 
+  Trash2, 
+  Package
+} from 'lucide-react';
 import { InventoryItem } from '../types';
 
 interface InventoryProps {
@@ -9,119 +14,90 @@ interface InventoryProps {
 }
 
 const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
-  const [activeTab, setActiveTab] = useState<'Fridge' | 'Pantry'>('Fridge');
-  const [showForm, setShowForm] = useState(false);
-  const [newItemName, setNewItemName] = useState('');
-  const [expiry, setExpiry] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'fridge' | 'pantry'>('all');
 
-  const filteredItems = items.filter(i => i.category === activeTab);
+  const filteredItems = items.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = activeFilter === 'all' || item.location.toLowerCase() === activeFilter;
+    return matchesSearch && matchesFilter;
+  });
 
-  const handleAdd = () => {
-    if (!newItemName) return;
-    const item: InventoryItem = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: newItemName,
-      category: activeTab,
-      expiryDate: expiry || new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
-      quantity: '1 unit'
-    };
-    onAdd(item);
-    setNewItemName('');
-    setExpiry('');
-    setShowForm(false);
+  const getStatusColor = (expiryDate: string) => {
+    const daysUntil = Math.ceil((new Date(expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    if (daysUntil < 0) return 'text-rose-500 bg-rose-500/10 border-rose-500/20';
+    if (daysUntil < 3) return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
+    return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between px-1">
-        <h2 className="text-2xl font-bold text-zinc-100 tracking-tight">Food Inventory</h2>
-        <button 
-          onClick={() => setShowForm(!showForm)}
-          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all shadow-lg ${showForm ? 'bg-zinc-700 text-zinc-400' : 'bg-blue-500 text-white shadow-blue-950/20'}`}
-        >
-          <i className={`fas ${showForm ? 'fa-times' : 'fa-plus'}`}></i>
-        </button>
+    <div className="space-y-6">
+      {/* Search Bar */}
+      <div className="relative group">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-blue-500 transition-colors" size={18} />
+        <input 
+          type="text" 
+          placeholder="Search your kitchen..." 
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-white"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
-      {showForm && (
-        <div className="bg-zinc-800 p-6 rounded-3xl shadow-2xl border border-zinc-700 space-y-5 animate-in zoom-in-95 duration-200">
-          <div>
-            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2 ml-1">Label Name</label>
-            <input 
-              className="w-full bg-zinc-700 border border-zinc-600 rounded-2xl px-4 py-3 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-zinc-600"
-              placeholder="e.g. Atlantic Salmon"
-              value={newItemName}
-              onChange={(e) => setNewItemName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2 ml-1">Use By Date</label>
-            <input 
-              type="date"
-              className="w-full bg-zinc-700 border border-zinc-600 rounded-2xl px-4 py-3 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 color-scheme-dark"
-              style={{ colorScheme: 'dark' }}
-              value={expiry}
-              onChange={(e) => setExpiry(e.target.value)}
-            />
-          </div>
-          <button 
-            onClick={handleAdd}
-            className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-950/40 hover:bg-blue-500 transition-all"
-          >
-            Add to {activeTab}
-          </button>
+      {/* HEADER WITH THE MISSING ICON */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-500 border border-emerald-500/20">
+          {/* This is the icon that was missing */}
+          <Refrigerator size={24} /> 
         </div>
-      )}
+        <div>
+          <h3 className="text-lg font-black text-white tracking-tight">Food Inventory</h3>
+          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">Stock Levels</p>
+        </div>
+      </div>
 
-      {/* Tabs */}
-      <div className="flex bg-zinc-800 p-1.5 rounded-[1.5rem] border border-zinc-700">
-        {(['Fridge', 'Pantry'] as const).map(tab => (
+      {/* Filter Buttons */}
+      <div className="flex gap-2 p-1 bg-zinc-900 rounded-2xl border border-zinc-800">
+        {(['all', 'fridge', 'pantry'] as const).map((filter) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-2xl transition-all ${activeTab === tab ? 'bg-zinc-700 text-blue-500 shadow-lg' : 'text-zinc-600 hover:text-zinc-400'}`}
+            key={filter}
+            onClick={() => setActiveFilter(filter)}
+            className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+              activeFilter === filter ? 'bg-zinc-800 text-white shadow-lg border border-zinc-700' : 'text-zinc-500 hover:text-zinc-300'
+            }`}
           >
-            {tab}
+            {filter}
           </button>
         ))}
       </div>
 
-      {/* List */}
-      <div className="space-y-3">
+      {/* Inventory List */}
+      <div className="grid gap-3">
         {filteredItems.length > 0 ? (
-          filteredItems.sort((a,b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()).map(item => {
-            const daysLeft = Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
-            const isCritical = daysLeft >= 0 && daysLeft < 3;
-            const isExpired = daysLeft < 0;
-            
-            return (
-              <div key={item.id} className="group bg-zinc-800/60 p-4 rounded-3xl border border-zinc-700 flex items-center justify-between shadow-sm hover:border-zinc-600 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${isCritical || isExpired ? 'bg-blue-500/10 border-blue-500/30 text-blue-500' : 'bg-zinc-700 border-zinc-600 text-zinc-500'}`}>
-                    <i className={`fas ${item.category === 'Fridge' ? 'fa-snowflake' : 'fa-box-open'}`}></i>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-zinc-100">{item.name}</h4>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest inline-block mt-1 ${isExpired ? 'bg-zinc-700 text-zinc-600' : isCritical ? 'bg-blue-600/20 text-blue-500' : 'bg-zinc-700 text-zinc-500'}`}>
-                      {isExpired ? 'Expired' : `${daysLeft} days left`}
+          filteredItems.map(item => (
+            <div key={item.id} className="bg-zinc-900 border border-zinc-800 p-4 rounded-3xl flex items-center justify-between group hover:border-zinc-700 transition-all">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 group-hover:text-blue-500 transition-colors">
+                  {item.location.toLowerCase() === 'fridge' ? <Refrigerator size={20} /> : <Package size={20} />}
+                </div>
+                <div>
+                  <h4 className="font-bold text-zinc-100">{item.name}</h4>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full border ${getStatusColor(item.expiryDate)}`}>
+                      {new Date(item.expiryDate) < new Date() ? 'Expired' : `Expires ${item.expiryDate}`}
                     </span>
                   </div>
                 </div>
-                <button 
-                  onClick={() => onDelete(item.id)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-zinc-600 hover:text-blue-500 transition-colors"
-                >
-                  <i className="fas fa-trash-alt text-sm"></i>
-                </button>
               </div>
-            );
-          })
-        ) : (
-          <div className="text-center py-16 opacity-30">
-            <div className="text-6xl mb-6">
-              <i className="fas fa-barcode-read"></i>
+              <button onClick={() => onDelete(item.id)} className="p-2 text-zinc-600 hover:text-rose-500 transition-colors">
+                <Trash2 size={18} />
+              </button>
             </div>
-            <p className="font-black uppercase text-xs tracking-widest">{activeTab} is Empty</p>
+          ))
+        ) : (
+          <div className="text-center py-12 bg-zinc-900/50 rounded-[2.5rem] border border-dashed border-zinc-800">
+            <Package size={32} className="mx-auto text-zinc-800 mb-2" />
+            <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest">No items found</p>
           </div>
         )}
       </div>
