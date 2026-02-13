@@ -12,6 +12,12 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
   const [activeTab, setActiveTab] = useState<'Fridge' | 'Pantry'>('Fridge');
   const [showForm, setShowForm] = useState(false);
   const [newItemName, setNewItemName] = useState('');
+  // Default to 7 days from today in YYYY-MM-DD format for date input
+  const getDefaultDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    return date.toISOString().split('T')[0];
+  };
   const [expiry, setExpiry] = useState('');
 
   const filteredItems = items.filter(i => i.category === activeTab);
@@ -64,9 +70,14 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
               type="date"
               className="w-full bg-zinc-700 border border-zinc-600 rounded-2xl px-4 py-3 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 color-scheme-dark"
               style={{ colorScheme: 'dark' }}
+              min={new Date().toISOString().split('T')[0]}
+              placeholder={getDefaultDate()}
               value={expiry}
               onChange={(e) => setExpiry(e.target.value)}
             />
+            {!expiry && (
+              <p className="text-[9px] text-zinc-500 mt-1 ml-1">Leave empty to default to 7 days from today</p>
+            )}
           </div>
           <button
             onClick={handleAdd}
@@ -96,20 +107,61 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
           filteredItems
             .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime())
             .map(item => {
-              const daysLeft = Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
-              const isCritical = daysLeft >= 0 && daysLeft < 3;
+              // Calculate days left, ensuring we compare dates at midnight to avoid timezone issues
+              const expiryDate = new Date(item.expiryDate);
+              const today = new Date();
+              expiryDate.setHours(0, 0, 0, 0);
+              today.setHours(0, 0, 0, 0);
+              const daysLeft = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
               const isExpired = daysLeft < 0;
+              const isExpiringSoon = daysLeft >= 0 && daysLeft <= 2; // 1-2 days left
+              const isFresh = daysLeft >= 3; // 3+ days left
+
+              // Determine status text and colors
+              let statusText: string;
+              let statusBg: string;
+              let statusTextColor: string;
+              let statusBorder: string;
+              let iconBg: string;
+              let iconBorder: string;
+              let iconColor: string;
+
+              if (isExpired) {
+                statusText = 'Expired';
+                statusBg = 'bg-rose-500/20';
+                statusTextColor = 'text-rose-400';
+                statusBorder = 'border-rose-500/30';
+                iconBg = 'bg-rose-500/10';
+                iconBorder = 'border-rose-500/30';
+                iconColor = 'text-rose-500';
+              } else if (isExpiringSoon) {
+                statusText = 'Expiring Soon';
+                statusBg = 'bg-amber-500/20';
+                statusTextColor = 'text-amber-400';
+                statusBorder = 'border-amber-500/30';
+                iconBg = 'bg-amber-500/10';
+                iconBorder = 'border-amber-500/30';
+                iconColor = 'text-amber-500';
+              } else {
+                statusText = 'Fresh';
+                statusBg = 'bg-emerald-500/20';
+                statusTextColor = 'text-emerald-400';
+                statusBorder = 'border-emerald-500/30';
+                iconBg = 'bg-emerald-500/10';
+                iconBorder = 'border-emerald-500/30';
+                iconColor = 'text-emerald-500';
+              }
 
               return (
                 <div key={item.id} className="group bg-zinc-900/40 backdrop-blur-sm p-4 rounded-3xl border border-zinc-800/50 flex items-center justify-between shadow-sm hover:border-zinc-700 transition-all">
                   <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${isCritical || isExpired ? 'bg-blue-500/10 border-blue-500/30 text-blue-500' : 'bg-zinc-800/40 border-zinc-800/50 text-zinc-500'}`}>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${iconBg} ${iconBorder} ${iconColor}`}>
                       {item.category === 'Fridge' ? <Refrigerator size={20} strokeWidth={2} /> : <Package size={20} strokeWidth={2} />}
                     </div>
                     <div>
                       <h4 className="font-bold text-zinc-100">{item.name}</h4>
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest inline-block mt-1 ${isExpired ? 'bg-zinc-900/40 text-zinc-600 border border-zinc-800/50' : isCritical ? 'bg-blue-600/20 text-blue-500 border border-blue-500/20' : 'bg-zinc-900/40 text-zinc-500 border border-zinc-800/50'}`}>
-                        {isExpired ? 'Expired' : `${daysLeft} days left`}
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest inline-block mt-1 border ${statusBg} ${statusTextColor} ${statusBorder}`}>
+                        {isExpired ? statusText : `${daysLeft} days left`}
                       </span>
                     </div>
                   </div>
