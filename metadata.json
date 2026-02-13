@@ -1,0 +1,8 @@
+
+{
+  "name": "FitGPT",
+  "description": "An AI-powered nutrition assistant that analyzes food images, tracks pantry inventory, and provides hyper-personalized recipe suggestions based on your daily caloric budget.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
