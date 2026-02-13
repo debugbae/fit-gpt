@@ -1,13 +1,15 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { analyzeFoodImage } from '../services/geminiService';
-import { FoodAnalysis } from '../types';
+import { FoodAnalysis, InventoryItem } from '../types';
+import { Mic, X } from 'lucide-react';
 
 interface FoodScannerProps {
   onLogMeal: (analysis: FoodAnalysis, photo?: string) => void;
+  inventory: InventoryItem[];
+  onDeductInventory?: (ingredientNames: string[]) => void;
 }
 
-const FoodScanner: React.FC<FoodScannerProps> = ({ onLogMeal }) => {
+const FoodScanner: React.FC<FoodScannerProps> = ({ onLogMeal, inventory, onDeductInventory }) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -15,6 +17,8 @@ const FoodScanner: React.FC<FoodScannerProps> = ({ onLogMeal }) => {
   const [clarification, setClarification] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [matchedIngredients, setMatchedIngredients] = useState<InventoryItem[]>([]);
+  const [showDeductionPrompt, setShowDeductionPrompt] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -76,11 +80,33 @@ const FoodScanner: React.FC<FoodScannerProps> = ({ onLogMeal }) => {
       const base64 = imageData.split(',')[1];
       const result = await analyzeFoodImage(base64, userText);
       setAnalysis(result);
+      
+      // Context-aware: Match ingredients from analysis to inventory
+      if (result.ingredients && inventory.length > 0) {
+        const matched = inventory.filter(item => 
+          result.ingredients.some(ing => 
+            item.name.toLowerCase().includes(ing.toLowerCase()) || 
+            ing.toLowerCase().includes(item.name.toLowerCase())
+          )
+        );
+        if (matched.length > 0) {
+          setMatchedIngredients(matched);
+          setShowDeductionPrompt(true);
+        }
+      }
     } catch (err) {
       console.error("Analysis failed:", err);
       setError("Vision engine failed. Try again.");
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleDeductIngredients = () => {
+    if (onDeductInventory && matchedIngredients.length > 0) {
+      onDeductInventory(matchedIngredients.map(item => item.name));
+      setShowDeductionPrompt(false);
+      setMatchedIngredients([]);
     }
   };
 
@@ -130,14 +156,29 @@ const FoodScanner: React.FC<FoodScannerProps> = ({ onLogMeal }) => {
                     <div className="w-8 h-8 border-b-2 border-r-2 border-blue-500 absolute bottom-0 right-0"></div>
                   </div>
                 </div>
-                <button 
-                  onClick={capture}
-                  className="absolute bottom-8 left-1/2 -translate-x-1/2 w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center border-4 border-zinc-800 active:scale-90 transition-transform shadow-2xl"
-                >
-                  <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-900/40">
-                    <div className="w-4 h-4 bg-white/20 rounded-full border border-white/40"></div>
-                  </div>
-                </button>
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4">
+                  {/* Quick Voice Log Button */}
+                  <button 
+                    onClick={() => {
+                      // Voice logging placeholder - can be implemented with Web Speech API
+                      alert('Voice logging coming soon!');
+                    }}
+                    className="w-16 h-16 bg-zinc-900/80 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-zinc-700 active:scale-90 transition-transform shadow-xl"
+                    aria-label="Quick Voice Log"
+                  >
+                    <Mic size={24} className="text-blue-400" strokeWidth={2} />
+                  </button>
+                  
+                  {/* Capture Button */}
+                  <button 
+                    onClick={capture}
+                    className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center border-4 border-zinc-800 active:scale-90 transition-transform shadow-2xl"
+                  >
+                    <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-900/40">
+                      <div className="w-4 h-4 bg-white/20 rounded-full border border-white/40"></div>
+                    </div>
+                  </button>
+                </div>
               </>
             )}
           </>
@@ -230,6 +271,39 @@ const FoodScanner: React.FC<FoodScannerProps> = ({ onLogMeal }) => {
                 <SmallMacro val={analysis.macros.sodium} label="Sodium" unit="mg" />
               </div>
 
+              {/* Context-Aware Inventory Deduction Prompt */}
+              {showDeductionPrompt && matchedIngredients.length > 0 && (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 mb-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 text-xs font-black uppercase tracking-widest">Kitchen Pulse Match</span>
+                    </div>
+                    <button
+                      onClick={() => setShowDeductionPrompt(false)}
+                      className="text-zinc-500 hover:text-zinc-300"
+                    >
+                      <X size={16} strokeWidth={2} />
+                    </button>
+                  </div>
+                  <p className="text-xs text-zinc-300 mb-3">
+                    Found {matchedIngredients.length} ingredient{matchedIngredients.length > 1 ? 's' : ''} in your pantry:
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {matchedIngredients.map(item => (
+                      <span key={item.id} className="text-xs bg-zinc-800/60 px-2 py-1 rounded-lg text-zinc-200 border border-zinc-700">
+                        {item.name}
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleDeductIngredients}
+                    className="w-full py-2.5 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-emerald-600/30 transition-all"
+                  >
+                    Deduct from Inventory
+                  </button>
+                </div>
+              )}
+
               <div className="flex gap-3 pt-4">
                 <button 
                   onClick={handleRetake}
@@ -238,7 +312,13 @@ const FoodScanner: React.FC<FoodScannerProps> = ({ onLogMeal }) => {
                   Discard
                 </button>
                 <button 
-                  onClick={() => onLogMeal(analysis, photo || undefined)}
+                  onClick={() => {
+                    onLogMeal(analysis, photo || undefined);
+                    // Auto-deduct if user didn't manually do it
+                    if (showDeductionPrompt && matchedIngredients.length > 0 && onDeductInventory) {
+                      onDeductInventory(matchedIngredients.map(item => item.name));
+                    }
+                  }}
                   className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-950/50 hover:bg-blue-500 transition-all active:scale-90"
                 >
                   Confirm Entry

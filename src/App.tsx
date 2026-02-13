@@ -100,6 +100,24 @@ const App: React.FC = () => {
     setInventory(prev => prev.filter(item => item.id !== id));
   };
 
+  const deductInventoryItems = (ingredientNames: string[]) => {
+    setInventory(prev => {
+      const updated = [...prev];
+      ingredientNames.forEach(name => {
+        const index = updated.findIndex(item => 
+          item.name.toLowerCase() === name.toLowerCase() ||
+          name.toLowerCase().includes(item.name.toLowerCase()) ||
+          item.name.toLowerCase().includes(name.toLowerCase())
+        );
+        if (index !== -1) {
+          // Remove the item or reduce quantity
+          updated.splice(index, 1);
+        }
+      });
+      return updated;
+    });
+  };
+
   const updateStats = (newStats: UserStats) => {
     setStats(newStats);
     setActiveView('Dashboard');
@@ -169,7 +187,7 @@ const App: React.FC = () => {
         )}
         
         {activeView === 'Dashboard' && <Dashboard stats={stats} inventory={inventory} />}
-        {activeView === 'MealScanner' && <FoodScanner onLogMeal={addMeal} />}
+        {activeView === 'MealScanner' && <FoodScanner onLogMeal={addMeal} inventory={inventory} onDeductInventory={deductInventoryItems} />}
         {activeView === 'FridgeScanner' && <FridgeScanner onAddItems={updateInventoryBulk} onCancel={() => setActiveView('Dashboard')} />}
         {activeView === 'KitchenHub' && <KitchenHub inventory={inventory} stats={stats} onAddInventory={updateInventory} onDeleteInventory={deleteInventoryItem} />}
         {activeView === 'Profile' && <Profile stats={stats} onUpdate={updateStats} />}
