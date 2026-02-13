@@ -11,9 +11,11 @@ interface KitchenHubProps {
   onDeleteInventory: (id: string) => void;
 }
 
+// Define the allowed types clearly
+type TabType = 'inventory' | 'shop' | 'recipes';
+
 const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventory, onDeleteInventory }) => {
-  // The state only allows these 3 specific strings
-  const [activeTab, setActiveTab] = useState<'inventory' | 'recipes' | 'shop'>('inventory');
+  const [activeTab, setActiveTab] = useState<TabType>('inventory');
 
   const shoppingList = useMemo(() => {
     const saved = localStorage.getItem('fitgpt_favorites');
@@ -32,6 +34,9 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
     alert('Shopping list copied!');
   };
 
+  // Define the tabs array outside the render or with a clear type
+  const tabs: TabType[] = ['inventory', 'shop', 'recipes'];
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <header className="px-1 flex items-center justify-between">
@@ -41,8 +46,7 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
         </div>
         
         <div className="flex bg-zinc-800 p-1 rounded-2xl border border-zinc-700">
-          {/* We use "as const" here so TypeScript knows these are the ONLY allowed values */}
-          {(['inventory', 'shop', 'recipes'] as const).map((tab) => (
+          {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -84,3 +88,19 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
                     </div>
                     <span className="text-sm font-bold text-zinc-300 uppercase tracking-wide">{item}</span>
                     <PlusCircle size={18} className="ml-auto text-zinc-700 group-hover:text-blue-500 transition-colors" />
+                  </div>
+                ))}
+                
+                <div className="pt-6 border-t border-zinc-700/50 mt-4">
+                  <button 
+                    onClick={copyToClipboard}
+                    className="w-full py-4 bg-zinc-700 text-zinc-400 font-black uppercase text-[10px] tracking-widest rounded-2xl hover:text-white transition-all flex items-center justify-center gap-2"
+                  >
+                    <Copy size={14} />
+                    Copy List to Clipboard
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-
