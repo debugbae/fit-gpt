@@ -11,31 +11,50 @@ interface KitchenHubProps {
   onDeleteInventory: (id: string) => void;
 }
 
-// Define the allowed types clearly
-type TabType = 'inventory' | 'shop' | 'recipes';
+// Explicitly define the tabs to prevent TypeScript guessing games
+type TabID = 'inventory' | 'shop' | 'recipes';
 
 const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventory, onDeleteInventory }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('inventory');
+  const [activeTab, setActiveTab] = useState<TabID>('inventory');
 
   const shoppingList = useMemo(() => {
-    const saved = localStorage.getItem('fitgpt_favorites');
-    const favorites: RecipeSuggestion[] = saved ? JSON.parse(saved) : [];
-    const missing = new Set<string>();
-    
-    favorites.forEach(recipe => {
-      recipe.ingredientsMissing.forEach(ing => missing.add(ing));
-    });
-    
-    return Array.from(missing);
+    try {
+      const saved = localStorage.getItem('fitgpt_favorites');
+      const favorites: RecipeSuggestion[] = saved ? JSON.parse(saved) : [];
+      const missing = new Set<string>();
+      
+      favorites.forEach(recipe => {
+        if (recipe.ingredientsMissing) {
+          recipe.ingredientsMissing.forEach(ing => missing.add(ing));
+        }
+      });
+      
+      return Array.from(missing);
+    } catch (e) {
+      return [];
+    }
   }, [activeTab]);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(shoppingList.join(', '));
-    alert('Shopping list copied!');
+    if (shoppingList.length > 0) {
+      navigator.clipboard.writeText(shoppingList.join(', '));
+      alert('Shopping list copied!');
+    }
   };
 
-  // Define the tabs array outside the render or with a clear type
-  const tabs: TabType[] = ['inventory', 'shop', 'recipes'];
+  // Helper to render the buttons without type errors
+  const renderTabButton = (id: TabID, label: string) => (
+    <button
+      onClick={() => setActiveTab(id)}
+      className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+        activeTab === id 
+          ? 'bg-blue-600 text-white shadow-lg' 
+          : 'text-zinc-500 hover:text-zinc-300'
+      }`}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -46,19 +65,9 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
         </div>
         
         <div className="flex bg-zinc-800 p-1 rounded-2xl border border-zinc-700">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                activeTab === tab 
-                  ? 'bg-blue-600 text-white shadow-lg' 
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              {tab === 'inventory' ? 'Stock' : tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+          {renderTabButton('inventory', 'Stock')}
+          {renderTabButton('shop', 'Shop')}
+          {renderTabButton('recipes', 'Recipes')}
         </div>
       </header>
 
@@ -103,4 +112,22 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-
+                <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-700">
+                  <ClipboardList size={32} />
+                </div>
+                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Your shopping list is clear</p>
+                <p className="text-[8px] text-zinc-700 font-bold uppercase mt-2">Favorite recipes to see missing stock</p>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+
+      {activeTab === 'recipes' && (
+        <RecipeList inventory={inventory} stats={stats} />
+      )}
+    </div>
+  );
+};
+
+export default KitchenHub;
