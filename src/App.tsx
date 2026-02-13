@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { Refrigerator } from 'lucide-react';
 import { AppView, UserStats, InventoryItem, FoodAnalysis, AnalyzedMeal } from './types';
 import { INITIAL_STATS, INITIAL_INVENTORY } from './constants';
 import Dashboard from './components/Dashboard';
@@ -214,7 +214,7 @@ const App: React.FC = () => {
               onClick={() => { setActiveView('FridgeScanner'); setIsCameraMenuOpen(false); }}
               className="w-full bg-zinc-800 border border-zinc-700 py-5 rounded-3xl flex items-center justify-center gap-4 text-white hover:bg-zinc-700 transition-all"
             >
-              <i className="fas fa-refrigerator text-blue-500 text-xl"></i>
+              <Refrigerator className="text-blue-500 shrink-0" size={24} strokeWidth={2.5} />
               <div className="text-left">
                 <div className="font-black uppercase text-xs tracking-widest">Stock Auditor</div>
                 <div className="text-[10px] text-zinc-500 font-bold">Auto-update pantry list</div>

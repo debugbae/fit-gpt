@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { Refrigerator, Plus, X } from 'lucide-react';
 import { InventoryItem } from '../types';
 
 interface InventoryProps {
@@ -34,17 +34,21 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
   return (
     <div className="space-y-4 animate-in fade-in duration-500">
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-2xl font-bold text-zinc-100 tracking-tight">Food Inventory</h2>
+        <div className="flex items-center gap-3">
+          <Refrigerator className="text-blue-500 shrink-0" size={24} strokeWidth={2.5} />
+          <h2 className="text-2xl font-bold text-zinc-100 tracking-tight">Food Inventory</h2>
+        </div>
         <button 
           onClick={() => setShowForm(!showForm)}
-          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all shadow-lg ${showForm ? 'bg-zinc-700 text-zinc-400' : 'bg-blue-500 text-white shadow-blue-950/20'}`}
+          aria-label={showForm ? 'Close add item' : 'Add item'}
+          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all shadow-lg border ${showForm ? 'bg-zinc-900/40 text-zinc-400 border-zinc-800/50' : 'bg-blue-500 text-white shadow-blue-950/20 border-blue-500/30'}`}
         >
-          <i className={`fas ${showForm ? 'fa-times' : 'fa-plus'}`}></i>
+          {showForm ? <X size={20} strokeWidth={2.5} /> : <Plus size={22} strokeWidth={2.5} />}
         </button>
       </div>
 
       {showForm && (
-        <div className="bg-zinc-800 p-6 rounded-3xl shadow-2xl border border-zinc-700 space-y-5 animate-in zoom-in-95 duration-200">
+        <div className="bg-zinc-900/40 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-zinc-800/50 space-y-5 animate-in zoom-in-95 duration-200">
           <div>
             <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2 ml-1">Label Name</label>
             <input 
@@ -74,12 +78,12 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
       )}
 
       {/* Tabs */}
-      <div className="flex bg-zinc-800 p-1.5 rounded-[1.5rem] border border-zinc-700">
+      <div className="flex bg-zinc-900/40 backdrop-blur-sm p-1.5 rounded-[1.5rem] border border-zinc-800/50">
         {(['Fridge', 'Pantry'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-2xl transition-all ${activeTab === tab ? 'bg-zinc-700 text-blue-500 shadow-lg' : 'text-zinc-600 hover:text-zinc-400'}`}
+            className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-2xl transition-all ${activeTab === tab ? 'bg-zinc-800/60 text-blue-500 shadow-lg border border-zinc-800/50' : 'text-zinc-600 hover:text-zinc-400'}`}
           >
             {tab}
           </button>
@@ -95,14 +99,14 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
             const isExpired = daysLeft < 0;
             
             return (
-              <div key={item.id} className="group bg-zinc-800/60 p-4 rounded-3xl border border-zinc-700 flex items-center justify-between shadow-sm hover:border-zinc-600 transition-all">
+              <div key={item.id} className="group bg-zinc-900/40 backdrop-blur-sm p-4 rounded-3xl border border-zinc-800/50 flex items-center justify-between shadow-sm hover:border-zinc-700 transition-all">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${isCritical || isExpired ? 'bg-blue-500/10 border-blue-500/30 text-blue-500' : 'bg-zinc-700 border-zinc-600 text-zinc-500'}`}>
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${isCritical || isExpired ? 'bg-blue-500/10 border-blue-500/30 text-blue-500' : 'bg-zinc-800/40 border-zinc-800/50 text-zinc-500'}`}>
                     <i className={`fas ${item.category === 'Fridge' ? 'fa-snowflake' : 'fa-box-open'}`}></i>
                   </div>
                   <div>
                     <h4 className="font-bold text-zinc-100">{item.name}</h4>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest inline-block mt-1 ${isExpired ? 'bg-zinc-700 text-zinc-600' : isCritical ? 'bg-blue-600/20 text-blue-500' : 'bg-zinc-700 text-zinc-500'}`}>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest inline-block mt-1 ${isExpired ? 'bg-zinc-900/40 text-zinc-600 border border-zinc-800/50' : isCritical ? 'bg-blue-600/20 text-blue-500 border border-blue-500/20' : 'bg-zinc-900/40 text-zinc-500 border border-zinc-800/50'}`}>
                       {isExpired ? 'Expired' : `${daysLeft} days left`}
                     </span>
                   </div>
@@ -117,7 +121,7 @@ const Inventory: React.FC<InventoryProps> = ({ items, onAdd, onDelete }) => {
             );
           })
         ) : (
-          <div className="text-center py-16 opacity-30">
+          <div className="text-center py-16 rounded-3xl border border-zinc-800/50 bg-zinc-900/40 backdrop-blur-sm opacity-60">
             <div className="text-6xl mb-6">
               <i className="fas fa-barcode-read"></i>
             </div>

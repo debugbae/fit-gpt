@@ -33,7 +33,7 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
           <h2 className="text-2xl font-black text-zinc-100 tracking-tight">Kitchen Hub</h2>
           <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mt-1">Command Center</p>
         </div>
-        <div className="flex bg-zinc-800 p-1 rounded-2xl border border-zinc-700">
+        <div className="flex bg-zinc-900/40 backdrop-blur-sm p-1 rounded-2xl border border-zinc-800/50">
           <button 
             onClick={() => setActiveTab('inventory')}
             className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'inventory' ? 'bg-blue-600 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
@@ -61,7 +61,7 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
 
       {activeTab === 'shop' && (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-          <section className="bg-zinc-800 p-6 rounded-[2.5rem] border border-zinc-700 shadow-xl">
+          <section className="bg-zinc-900/40 backdrop-blur-sm p-6 rounded-[2.5rem] border border-zinc-800/50 shadow-xl">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500 border border-blue-500/20">
                 <i className="fas fa-cart-shopping"></i>
@@ -75,7 +75,7 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
             {shoppingList.length > 0 ? (
               <div className="space-y-3">
                 {shoppingList.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-4 p-4 bg-zinc-900 border border-zinc-800 rounded-2xl group transition-all hover:border-blue-500/30">
+                  <div key={idx} className="flex items-center gap-4 p-4 bg-zinc-900/40 border border-zinc-800/50 rounded-2xl group transition-all hover:border-blue-500/30 backdrop-blur-sm">
                     <div className="w-5 h-5 rounded-md border-2 border-zinc-700 flex items-center justify-center transition-all group-hover:border-blue-500">
                       <div className="w-2.5 h-2.5 bg-blue-500 rounded-sm opacity-0 group-active:opacity-100"></div>
                     </div>
@@ -90,8 +90,8 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
                 </div>
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-700">
+              <div className="text-center py-12 rounded-3xl border border-zinc-800/50 bg-zinc-900/40 backdrop-blur-sm">
+                <div className="w-16 h-16 bg-zinc-900/60 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-600 border border-zinc-800/50">
                   <i className="fas fa-clipboard-list text-2xl"></i>
                 </div>
                 <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Your shopping list is clear</p>
