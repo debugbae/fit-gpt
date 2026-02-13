@@ -10,7 +10,7 @@ import { InventoryItem } from '../types';
 
 interface InventoryProps {
   items: InventoryItem[];
-  onAdd: (item: InventoryItem) => void;
+  onAdd: (item: any) => void; // This connects to the parent's add logic
   onDelete: (id: string) => void;
 }
 
@@ -27,14 +27,14 @@ const Inventory: React.FC<InventoryProps> = ({ items = [], onAdd, onDelete }) =>
 
   const getStatusColor = (expiryDate: string) => {
     const daysUntil = Math.ceil((new Date(expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-    if (daysUntil < 0) return 'text-rose-400 bg-rose-400/5 border-rose-400/10';
-    if (daysUntil < 3) return 'text-amber-400 bg-amber-400/5 border-amber-400/10';
-    return 'text-emerald-400 bg-emerald-400/5 border-emerald-400/10';
+    if (daysUntil < 0) return 'text-rose-400 bg-rose-400/10 border-rose-400/20';
+    if (daysUntil < 3) return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+    return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
   };
 
   return (
     <div className="space-y-6">
-      {/* Search Bar - Slightly lighter background */}
+      {/* Search Bar */}
       <div className="relative group">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-blue-500 transition-colors" size={18} />
         <input 
@@ -58,21 +58,17 @@ const Inventory: React.FC<InventoryProps> = ({ items = [], onAdd, onDelete }) =>
           </div>
         </div>
         
+        {/* FIXED: This now triggers the actual 'Add' action from your app */}
         <button 
-          onClick={() => onAdd({ 
-            id: Math.random().toString(36).substr(2, 9), 
-            name: 'New Item', 
-            expiryDate: new Date().toISOString().split('T')[0], 
-            location: 'Fridge', 
-            category: 'Other' 
-          })}
-          className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-900/40 hover:bg-blue-500 transition-all active:scale-95"
+          onClick={() => onAdd({})} 
+          className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-900/40 hover:bg-blue-500 transition-all active:scale-90 cursor-pointer"
+          title="Add Item"
         >
           <Plus size={20} strokeWidth={3} />
         </button>
       </div>
 
-      {/* Tabs - Lighter Zinc */}
+      {/* Filter Tabs */}
       <div className="flex gap-2 p-1 bg-zinc-900/80 rounded-2xl border border-zinc-800">
         {(['all', 'fridge', 'pantry'] as const).map((filter) => (
           <button
@@ -89,7 +85,7 @@ const Inventory: React.FC<InventoryProps> = ({ items = [], onAdd, onDelete }) =>
         ))}
       </div>
 
-      {/* Items List - Matches the "Card" style of the main app */}
+      {/* Items List */}
       <div className="grid gap-3">
         {filteredItems.length > 0 ? (
           filteredItems.map(item => (
