@@ -12,6 +12,7 @@ interface KitchenHubProps {
 }
 
 const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventory, onDeleteInventory }) => {
+  // The state only allows these 3 specific strings
   const [activeTab, setActiveTab] = useState<'inventory' | 'recipes' | 'shop'>('inventory');
 
   const shoppingList = useMemo(() => {
@@ -40,10 +41,11 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
         </div>
         
         <div className="flex bg-zinc-800 p-1 rounded-2xl border border-zinc-700">
+          {/* We use "as const" here so TypeScript knows these are the ONLY allowed values */}
           {(['inventory', 'shop', 'recipes'] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as 'inventory' | 'shop' | 'recipes')}
+              onClick={() => setActiveTab(tab)}
               className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                 activeTab === tab 
                   ? 'bg-blue-600 text-white shadow-lg' 
@@ -77,4 +79,8 @@ const KitchenHub: React.FC<KitchenHubProps> = ({ inventory, stats, onAddInventor
               <div className="space-y-3">
                 {shoppingList.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-4 p-4 bg-zinc-900 border border-zinc-800 rounded-2xl group transition-all hover:border-blue-500/30">
-                    <div className="w-5 h-5 rounded-md border-2 border-zinc-700 flex items-
+                    <div className="w-5 h-5 rounded-md border-2 border-zinc-700 flex items-center justify-center transition-all group-hover:border-blue-500">
+                      <CheckCircle2 size={12} className="text-blue-500 opacity-0 group-active:opacity-100" />
+                    </div>
+                    <span className="text-sm font-bold text-zinc-300 uppercase tracking-wide">{item}</span>
+                    <PlusCircle size={18} className="ml-auto text-zinc-700 group-hover:text-blue-500 transition-colors" />
