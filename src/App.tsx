@@ -22,11 +22,18 @@ import Community from './components/Community';
 
 const PASSCODE = 'debugbaeApp';
 
+// Simple static user for alternate login
+const SECONDARY_USER = {
+  username: 'vic',
+  password: 'hello',
+};
+
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem('fitgpt_authenticated') === 'true';
   });
-  const [passcodeInput, setPasscodeInput] = useState('');
+  const [usernameInput, setUsernameInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState(false);
   const [activeView, setActiveView] = useState<AppView>('Dashboard');
   const [stats, setStats] = useState<UserStats>(() => {
@@ -55,13 +62,24 @@ const App: React.FC = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcodeInput === PASSCODE) {
+    const isPrimaryPasscode =
+      usernameInput.trim() === '' && passwordInput === PASSCODE;
+    const isSecondaryUser =
+      usernameInput === SECONDARY_USER.username &&
+      passwordInput === SECONDARY_USER.password;
+
+    if (isPrimaryPasscode || isSecondaryUser) {
       setIsAuthenticated(true);
       localStorage.setItem('fitgpt_authenticated', 'true');
+      if (isSecondaryUser) {
+        localStorage.setItem('fitgpt_user', SECONDARY_USER.username);
+      } else {
+        localStorage.removeItem('fitgpt_user');
+      }
       setLoginError(false);
     } else {
       setLoginError(true);
-      setPasscodeInput('');
+      setPasswordInput('');
     }
   };
 
@@ -138,20 +156,42 @@ const App: React.FC = () => {
           </div>
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Passcode Required</label>
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">
+                Access Required
+              </label>
               <div className="relative">
-                <input 
-                  type="password" 
-                  autoFocus 
-                  className={`w-full bg-zinc-900 border ${loginError ? 'border-rose-500/50 ring-2 ring-rose-500/10' : 'border-zinc-800 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-600/10'} rounded-3xl px-6 py-5 text-center text-2xl font-black tracking-[0.5em] text-white transition-all outline-none placeholder:text-zinc-800`} 
-                  placeholder="••••••••" 
-                  value={passcodeInput}
-                  onChange={(e) => {
-                    setPasscodeInput(e.target.value);
-                    if (loginError) setLoginError(false);
-                  }} 
-                />
-                {loginError && <p className="absolute -bottom-8 left-0 right-0 text-center text-[10px] font-black uppercase text-rose-500 animate-bounce">Access Denied</p>}
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    autoFocus
+                    className="w-full bg-zinc-900 border border-zinc-800 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-600/10 rounded-3xl px-6 py-3 text-center text-sm font-bold tracking-[0.2em] text-white transition-all outline-none placeholder:text-zinc-700"
+                    placeholder="USERNAME (LEAVE BLANK FOR PASSCODE)"
+                    value={usernameInput}
+                    onChange={(e) => {
+                      setUsernameInput(e.target.value);
+                      if (loginError) setLoginError(false);
+                    }}
+                  />
+                  <input
+                    type="password"
+                    className={`w-full bg-zinc-900 border ${
+                      loginError
+                        ? 'border-rose-500/50 ring-2 ring-rose-500/10'
+                        : 'border-zinc-800 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-600/10'
+                    } rounded-3xl px-6 py-4 text-center text-xl font-black tracking-[0.5em] text-white transition-all outline-none placeholder:text-zinc-800`}
+                    placeholder="••••••••"
+                    value={passwordInput}
+                    onChange={(e) => {
+                      setPasswordInput(e.target.value);
+                      if (loginError) setLoginError(false);
+                    }}
+                  />
+                </div>
+                {loginError && (
+                  <p className="absolute -bottom-8 left-0 right-0 text-center text-[10px] font-black uppercase text-rose-500 animate-bounce">
+                    Access Denied
+                  </p>
+                )}
               </div>
             </div>
             <button type="submit" className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-2xl shadow-blue-950/50 active:scale-95 transition-all flex items-center justify-center gap-3">
