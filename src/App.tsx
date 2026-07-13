@@ -20,12 +20,12 @@ import Profile from './components/Profile';
 import Insights from './components/Insights';
 import Community from './components/Community';
 
-const PASSCODE = 'debugbaeApp';
+const PASSCODE = import.meta.env.VITE_APP_PASSCODE || '';
 
 // Simple static user for alternate login
 const SECONDARY_USER = {
-  username: 'vic',
-  password: 'hello',
+  username: import.meta.env.VITE_SECONDARY_USERNAME || '',
+  password: import.meta.env.VITE_SECONDARY_PASSWORD || '',
 };
 
 const App: React.FC = () => {

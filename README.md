@@ -22,8 +22,11 @@ React 19 · TypeScript · Vite · Tailwind CSS · Google Gemini API (`@google/ge
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Copy `.env.example` to `.env.local` and fill in the values:
+   - `VITE_GEMINI_API_KEY` — your Gemini API key
+   - `VITE_APP_PASSCODE` — passcode for the primary login gate
+   - `VITE_SECONDARY_USERNAME` / `VITE_SECONDARY_PASSWORD` — credentials for the secondary login
 3. Run the app:
    `npm run dev`
 
-> This app uses a simple client-side passcode gate for private access — it's a personal/demo project, not a production auth system.
+> This app uses a simple client-side passcode gate for private access — it's a personal/demo project, not a production auth system. Since it's client-side, anyone who inspects the built app's JS bundle can still recover these values; treat them as a light deterrent, not real security.
