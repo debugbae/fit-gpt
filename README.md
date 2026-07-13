@@ -1,20 +1,29 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# FitGPT
 
-# Run and deploy your AI Studio app
+AI-powered nutrition assistant that scans meal and fridge photos, tracks macros against a daily budget, and suggests recipes based on what's actually in your kitchen.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1of_PkO1cZuyruj4Cpxi_arqUTfOTOpHS
+- **Meal Scanner** — photograph a meal and get calories, protein, carbs, fat, and sodium via Gemini vision
+- **Stock Auditor** — photograph your fridge/pantry to auto-populate your inventory
+- **Kitchen Hub** — manage pantry inventory manually
+- **Dashboard** — daily macro tracking against your budget, with sodium alerts
+- **Insights** — trends over time
+- **Community** — social feed
+- **Profile** — set your daily calorie and macro budget
 
-## Run Locally
+## Tech stack
 
-**Prerequisites:**  Node.js
+React 19 · TypeScript · Vite · Tailwind CSS · Google Gemini API (`@google/generative-ai`) · lucide-react
 
+## Run locally
+
+**Prerequisites:** Node.js
 
 1. Install dependencies:
    `npm install`
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+> This app uses a simple client-side passcode gate for private access — it's a personal/demo project, not a production auth system.
